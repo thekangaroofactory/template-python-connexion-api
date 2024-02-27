@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: API Key Example
+  version: '1.0'
+servers:
+  - url: /openapi
+paths:
+  /resources:
+    get:
+      tags:
+        - Resources
+      operationId: app.get_resources
+      summary: Get all resources
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 100
+      responses:
+        '200':
+          description: Return resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+      security:
+        - api_key: [ ]
+  '/resources/{resource_id}':
+    get:
+      tags:
+        - Resources
+      operationId: app.get_resource
+      summary: Get a single resource
+      parameters:
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '200':
+          description: Return resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '404':
+          description: Resource does not exist
+      security:
+        - api_key: [ ]
+    put:
+      tags:
+        - Resources
+      operationId: app.put_resource
+      summary: Create or update a resource
+      parameters:
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '200':
+          description: Resource updated
+        '201':
+          description: New resource created
+      requestBody:
+        x-body-name: resource
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resource'
+      security:
+        - api_key: [ ]
+    delete:
+      tags:
+        - Resources
+      operationId: app.delete_resource
+      summary: Remove a resource
+      parameters:
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '204':
+          description: Resource was deleted
+        '404':
+          description: Resource does not exist
+      security:
+        - api_key: [ ]
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-Auth
+      in: header
+      x-apikeyInfoFunc: app.apikey_auth
+  parameters:
+    resource_id:
+      name: resource_id
+      description: Resource's Unique identifier
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-zA-Z0-9-]+$'
+  schemas:
+    Resource:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+          example: '123'
+          readOnly: true
+        name:
+          type: string
+          description: Resource's name
+          example: Susie
+          minLength: 1
+          maxLength: 100
+        created:
+          type: string
+          format: date-time
+          description: Creation time
+          example: '2015-07-07T15:49:51.230+02:00'
+          readOnly: true
